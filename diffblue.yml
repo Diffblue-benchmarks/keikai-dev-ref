@@ -1,0 +1,280 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 1.16666666667
+#  >methods=3
+#  >complexity=14
+#  >construction=0.25
+#  >dependency=0.333333333333
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/web/AppContextListener.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/web/AppContextListener.java
+# Target TGF: 3.375
+#  >methods=3
+#  >complexity=27
+#  >construction=0.25
+#  >dependency=0.5
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/web/BaseServlet.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/web/BaseServlet.java
+# Target TGF: 12.0666666667
+#  >methods=4
+#  >complexity=40
+#  >construction=3.0
+#  >dependency=1.03333333333
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/UiLanguage.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/UiLanguage.java
+   - dir: target/classes
+     file: io/keikai/devref/UseCase.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/UseCase.java
+# Target TGF: 4.0
+#  >methods=3
+#  >complexity=8
+#  >construction=1.0
+#  >dependency=0.5
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/app/exchange/CurrencyExchange$1.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/app/exchange/CurrencyExchange.java
+   - dir: target/classes
+     file: io/keikai/devref/app/exchange/CurrencyExchange.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/app/exchange/CurrencyExchange.java
+# Target TGF: 2.80952380952
+#  >methods=3
+#  >complexity=59
+#  >construction=0.142857142857
+#  >dependency=0.333333333333
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/web/CaseServlet.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/web/CaseServlet.java
+   - dir: target/classes
+     file: io/keikai/devref/web/BaseServlet.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/web/BaseServlet.java
+   - dir: target/classes
+     file: io/keikai/devref/UseCase.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/UseCase.java
+# Target TGF: 499.5
+#  >methods=4
+#  >complexity=111
+#  >construction=18.0
+#  >dependency=1.25
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/app/exchange/ExchangeRateFetcher.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/app/exchange/ExchangeRateFetcher.java
+# Target TGF: 18.6666666667
+#  >methods=5
+#  >complexity=46
+#  >construction=3.0
+#  >dependency=1.33333333333
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/performance/FillMillion.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/performance/FillMillion.java
+   - dir: target/classes
+     file: io/keikai/devref/UseCase.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/UseCase.java
+# Target TGF: 117.0
+#  >methods=3
+#  >complexity=39
+#  >construction=9.0
+#  >dependency=0.333333333333
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/Configuration.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/Configuration.java
+# Target TGF: 19.6666666667
+#  >methods=17
+#  >complexity=54
+#  >construction=3.0
+#  >dependency=1.16666666667
+ - target:
+   - dir: target/classes
+     file: io/keikai/devref/app/exchange/CurrencyExchange.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/app/exchange/CurrencyExchange.java
+   - dir: target/classes
+     file: io/keikai/devref/UseCase.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/UseCase.java
+   - dir: target/classes
+     file: io/keikai/devref/app/exchange/ExchangeRateFetcher.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/app/exchange/ExchangeRateFetcher.java
+   - dir: target/classes
+     file: io/keikai/devref/app/exchange/CurrencyExchange$1.class
+     sourceDir: src/main/java
+     sourceFile: io/keikai/devref/app/exchange/CurrencyExchange.java
